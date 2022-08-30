@@ -124,4 +124,4 @@ for filename in os.listdir('./cogs'):
 #To hide the token
 with open("token.0", "r", encoding="utf-8") as f:
   TOKEN = f.read()
-bot.run(TOKEN)
+bot.run(os.environ("DISCORD_TOKEN"))
