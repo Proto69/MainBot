@@ -3,15 +3,17 @@ import discord
 from discord.ext import commands
 from discord.ui import View
 from datetime import *
+import config
 
-guildId = 924913459592839238
-joinChannelId = 1011907888287064164
-memberCountChannelId = 961165677534789673
-botCountChannelId = 1013411720926072863
-userCountChannelId = 1013411842133086280
-joinRoleId = 978017653350367263
-suggestionChannelId = 939424501396013097
-pollChannelId = 939424501396013097
+bg_failGuildId = config.bg_failGuildId
+debugGuildId = config.debugGuildId
+joinChannelId = config.joinChannelId
+memberCountChannelId = config.memberCountChannelId
+botCountChannelId = config.botCountChannelId
+userCountChannelId = config.userCountChannelId
+joinRoleId = config.joinRoleId
+suggestionChannelIds = config.suggestionChannelIds
+pollChannelIds = config.pollChannelIds
 
 class PersistentView(View):
     def __init__(self):
@@ -39,9 +41,9 @@ async def updateStats():
   statsChannel = bot.get_channel(memberCountChannelId)
   userChannel = bot.get_channel(userCountChannelId)
   botChannel = bot.get_channel(botCountChannelId)
-  memberCount = bot.get_guild(guildId).member_count
+  memberCount = bot.get_guild(bg_failGuildId).member_count
   botCount = 0
-  members = bot.get_guild(guildId).members
+  members = bot.get_guild(bg_failGuildId).members
   for user in members:
     if user.bot:
       botCount += 1
@@ -52,7 +54,7 @@ async def updateStats():
 bot = PersistentViewBot()
 
 #See all extensions
-@bot.slash_command(name="listcogs", description="Lists all extensions", guild=discord.Object(id=guildId))
+@bot.slash_command(name="listcogs", description="Lists all extensions", guild=discord.Object(id=debugGuildId))
 async def slef(ctx):
   list = []
   for filename in os.listdir('./cogs'):
@@ -96,7 +98,7 @@ async def info(ctx: discord.ApplicationContext, user: discord.Member = None):
 async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
   channel = bot.get_channel(payload.channel_id)
   message = await channel.fetch_message(payload.message_id)
-  if payload.channel_id == suggestionChannelId or payload.channel_id == pollChannelId:
+  if payload.channel_id in suggestionChannelIds or payload.channel_id in pollChannelIds:
     for reaction1 in message.reactions:
       users = [user async for user in reaction1.users()]
       if payload.member in users and not payload.member.bot and str(payload.emoji) != str(reaction1.emoji):
@@ -122,4 +124,4 @@ for filename in os.listdir('./cogs'):
 
    
 #To hide the token
-bot.run(os.environ("DISCORD_TOKEN"))
+bot.run(config.token)

@@ -1,8 +1,9 @@
 import discord
 from discord.ext import commands
 from discord.ui import View
+import config
 
-joinRoleId = 978017653350367263
+joinRoleId = config.joinRoleId
 
 class VerifyMessageView(View):
     def __init__(self):

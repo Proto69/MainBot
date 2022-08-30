@@ -2,6 +2,9 @@ import discord
 from discord.ext import commands
 from discord.ui import View, Modal
 from datetime import *
+import config
+
+pollChannelIds = config.pollChannelIds
 
 class PollEmbed(discord.Embed):
     def __init__(self, user: discord.Member, options: list[str]):
@@ -63,17 +66,20 @@ class Poll(commands.Cog):
     
     @commands.slash_command(name="createpoll", description="Create a new poll message.")
     async def create_poll(self, interaction):
-        embed = discord.Embed(title="📊 **Polls** 📊",
-        color=discord.Color.gold(),
-        timestamp=datetime.now(),
-        fields=[
-             discord.EmbedField(name="БГ:", value="Използвай бутоните отдолу за да създадеш гласуване! Можеш да имаш до 5 опции!", inline=False),
-             discord.EmbedField(name="EN:", value="Use the buttons below to choose the number of choices! The maximum number is 5!", inline=False),
-             ]
-        )
-        embed.set_thumbnail(url='https://avatars.slack-edge.com/2020-05-09/1112549471909_7543dde099089941d3c3_512.png')
+        if (interaction.channel_id in pollChannelIds):
+            embed = discord.Embed(title="📊 **Polls** 📊",
+            color=discord.Color.gold(),
+            timestamp=datetime.now(),
+            fields=[
+                discord.EmbedField(name="БГ:", value="Използвай бутоните отдолу за да създадеш гласуване! Можеш да имаш до 5 опции!", inline=False),
+                discord.EmbedField(name="EN:", value="Use the buttons below to choose the number of choices! The maximum number is 5!", inline=False),
+                ]
+            )
+            embed.set_thumbnail(url='https://avatars.slack-edge.com/2020-05-09/1112549471909_7543dde099089941d3c3_512.png')
         
-        await interaction.channel.send(embed = embed, view=PollView())
+            await interaction.channel.send(embed = embed, view=PollView())
+        else:
+            await interaction.channel.send(f"You can't use polls here!")
 
 def setup(client):
     client.add_cog(Poll(client))
