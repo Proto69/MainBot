@@ -1,19 +1,20 @@
-import os
 import discord
 from discord.ext import commands
 from discord.ui import View
 from datetime import *
-import config
+import os
+import myConfig
 
-bg_failGuildId = config.bg_failGuildId
-debugGuildId = config.debugGuildId
-joinChannelId = config.joinChannelId
-memberCountChannelId = config.memberCountChannelId
-botCountChannelId = config.botCountChannelId
-userCountChannelId = config.userCountChannelId
-joinRoleId = config.joinRoleId
-suggestionChannelIds = config.suggestionChannelIds
-pollChannelIds = config.pollChannelIds
+bg_failGuildId = myConfig.bg_failGuildId
+debugGuildId = myConfig.debugGuildId
+joinChannelId = myConfig.joinChannelId
+memberCountChannelId = myConfig.memberCountChannelId
+botCountChannelId = myConfig.botCountChannelId
+userCountChannelId = myConfig.userCountChannelId
+joinRoleId = myConfig.joinRoleId
+suggestionChannelIds = myConfig.suggestionChannelIds
+pollChannelIds = myConfig.pollChannelIds
+token = myConfig.token
 
 class PersistentView(View):
     def __init__(self):
@@ -53,9 +54,28 @@ async def updateStats():
 
 bot = PersistentViewBot()
 
+#See all extensions
+@bot.slash_command(name="listcogs", description="Lists all extensions", guild=discord.Object(id=debugGuildId))
+async def slef(ctx):
+  list = []
+  for filename in os.listdir('./cogs'):
+    if filename.endswith('.py'):
+      list.append(filename[:-3])
+  await ctx.respond(f"{list}", ephemeral = True)
+
+@bot.slash_command(name="loadcog", description="Loads cog", guild=discord.Object(id=debugGuildId))
+async def sfwe(ctx, name:str):
+    bot.load_extension(f"cogs.{name}")
+    await ctx.respond("Done", ephemeral=True)
+    
+@bot.slash_command(name="unloadcog", description="Unloads cog", guild=discord.Object(id=debugGuildId))
+async def sfwe(ctx, name:str):
+    bot.unload_extension(f"cogs.{name}")
+    await ctx.respond("Done", ephemeral=True)
+
 #Shows user information
 @bot.slash_command(name="userinfo", description="Gets info about a user.")
-async def info(ctx, user: discord.Member = None):
+async def info(ctx: discord.ApplicationContext, user: discord.Member = None):
     user = user or ctx.author  # If no user is provided it'll use the author of the message
     embed = discord.Embed(
         fields=[
@@ -115,4 +135,4 @@ for filename in os.listdir('./cogs'):
 
    
 #To hide the token
-bot.run(config.token)
+bot.run(token)

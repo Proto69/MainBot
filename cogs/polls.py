@@ -2,9 +2,9 @@ import discord
 from discord.ext import commands
 from discord.ui import View, Modal, Button
 from datetime import *
-import config
+import myConfig
 
-pollChannelIds = config.pollChannelIds
+pollChannelIds = myConfig.pollChannelIds
 
 class PollEmbed(discord.Embed):
     def __init__(self, user: discord.Member, options: list[str]):

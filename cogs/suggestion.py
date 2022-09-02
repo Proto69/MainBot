@@ -1,9 +1,9 @@
 import discord
 from discord.ext import commands
 from datetime import *
-import config
+import myConfig
 
-suggestionChannelIds = config.suggestionChannelIds
+suggestionChannelIds = myConfig.suggestionChannelIds
 
 class Suggestions(commands.Cog):
 

@@ -1,9 +1,9 @@
 import discord
 from discord.ext import commands
 from discord.ui import View, Button
-import config
+import myConfig
 
-joinRoleId = config.joinRoleId
+joinRoleId = myConfig.joinRoleId
 
 class Verify(commands.Cog):
 
