@@ -53,23 +53,9 @@ async def updateStats():
 
 bot = PersistentViewBot()
 
-#See all extensions
-@bot.slash_command(name="listcogs", description="Lists all extensions", guild=discord.Object(id=debugGuildId))
-async def slef(ctx):
-  list = []
-  for filename in os.listdir('./cogs'):
-    if filename.endswith('.py'):
-      list.append(filename[:-3])
-  await ctx.respond(f"{list}", ephemeral = True)
-
-@bot.slash_command(name="unloadcog", description="Unloads the specified cog", guild=discord.Object(id=debugGuildId))
-async def slef(ctx, name:str):
-  bot.remove_cog(name)
-  await ctx.respond(f"Done!", ephemeral = True)
-
 #Shows user information
 @bot.slash_command(name="userinfo", description="Gets info about a user.")
-async def info(ctx: discord.ApplicationContext, user: discord.Member = None):
+async def info(ctx, user: discord.Member = None):
     user = user or ctx.author  # If no user is provided it'll use the author of the message
     embed = discord.Embed(
         fields=[

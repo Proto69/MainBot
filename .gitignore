@@ -1,4 +1,5 @@
 config.py
 MainBot/
-better_suggestion.py
 main.sqlite
+__pycache__/
+cogs/__pycache__/

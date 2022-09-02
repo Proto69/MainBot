@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-from discord.ui import View, Modal
+from discord.ui import View, Modal, Button
 from datetime import *
 import config
 
@@ -39,27 +39,6 @@ class PollModal(Modal):
                 if b == 5:
                     await msg.add_reaction("5️⃣")
 
-
-class PollView(View):
-    def __init__(self):
-        super().__init__(timeout=None)
-    
-    @discord.ui.button(label="2 choices",style=discord.ButtonStyle.green, custom_id="create_poll_2")
-    async def create_poll2(self, button, interaction):
-        await interaction.response.send_modal(PollModal(2))
-
-    @discord.ui.button(label="3 choices",style=discord.ButtonStyle.green, custom_id="create_poll_3")
-    async def create_poll3(self, button, interaction):
-        await interaction.response.send_modal(PollModal(3))
-
-    @discord.ui.button(label="4 choices",style=discord.ButtonStyle.green, custom_id="create_poll_4")
-    async def create_poll4(self, button, interaction):
-        await interaction.response.send_modal(PollModal(4))
-
-    @discord.ui.button(label="5 choices",style=discord.ButtonStyle.green, custom_id="create_poll_5")
-    async def create_poll5(self, button, interaction):
-        await interaction.response.send_modal(PollModal(5))
-
 class Poll(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -76,10 +55,24 @@ class Poll(commands.Cog):
                 ]
             )
             embed.set_thumbnail(url='https://avatars.slack-edge.com/2020-05-09/1112549471909_7543dde099089941d3c3_512.png')
-        
-            await interaction.channel.send(embed = embed, view=PollView())
+            button2 = Button(label="2 choices",style=discord.ButtonStyle.green, custom_id="create_poll_2")
+            button3 = Button(label="3 choices",style=discord.ButtonStyle.green, custom_id="create_poll_3")
+            button4 = Button(label="4 choices",style=discord.ButtonStyle.green, custom_id="create_poll_4")
+            button5 = Button(label="5 choices",style=discord.ButtonStyle.green, custom_id="create_poll_5")
+            await interaction.channel.send(embed = embed, view=View(button2, button3, button4, button5))
         else:
             await interaction.channel.send(f"You can't use polls here!")
+
+    @commands.Cog.listener()
+    async def on_interaction(self, interaction):
+        if interaction.custom_id == "create_poll_5":
+            await interaction.response.send_modal(PollModal(5))
+        elif interaction.custom_id == "create_poll_4":
+            await interaction.response.send_modal(PollModal(4))
+        elif interaction.custom_id == "create_poll_3":
+            await interaction.response.send_modal(PollModal(3))
+        elif interaction.custom_id == "create_poll_2": 
+            await interaction.response.send_modal(PollModal(2))
 
 def setup(client):
     client.add_cog(Poll(client))

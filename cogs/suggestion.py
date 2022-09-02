@@ -10,34 +10,30 @@ class Suggestions(commands.Cog):
     def __init__(self, client):
         self.client = client
 
-    @commands.slash_command(name="suggest", description="Creates a suggestion")
-    async def suggest(self, ctx, message: str):
-        user = ctx.author
-        if ctx.channel.id in suggestionChannelIds and not user.bot:
+    @commands.Cog.listener()
+    async def on_message(self, message: discord.Message):
+        user = message.author
+        if not user.bot:
+            if message.channel.id in suggestionChannelIds:
     
-            #The title and description
-            suggestionEmbed = discord.Embed(
-             fields=[
-             discord.EmbedField(name="Предложение:", value=message, inline=False)
-             ]
-            )
-            #Author, timestamp, footer and color
-            suggestionEmbed.set_author(name=user.display_name)
-            suggestionEmbed.timestamp = datetime.now()
-            suggestionEmbed.set_footer(text='\u200b')
-            if user.colour.value:
-                suggestionEmbed.colour = user.colour
+                #The title and description
+                suggestionEmbed = discord.Embed(
+                fields=[
+                discord.EmbedField(name="Предложение:", value=message.content, inline=False)
+                ]
+                )
+                #Author, timestamp, footer and color
+                suggestionEmbed.set_author(name=user.display_name)
+                suggestionEmbed.timestamp = datetime.now()
+                if user.colour.value:
+                    suggestionEmbed.colour = user.colour
                 suggestionEmbed.set_thumbnail(url="https://img.icons8.com/external-flaticons"+
                 "-flat-circular-flat-icons/200/external-suggestions-customer-feedback-flaticons-flat-circular-flat-icons.png")
 
-            message = await ctx.respond(embed = suggestionEmbed)
-            msg = await message.original_message()
-            await msg.add_reaction("✅")
-            await msg.add_reaction("❌")
-        else:
-            await ctx.respond("You are not allowed to send this command here!", ephemeral=True)
-        
-
+                await message.delete()
+                msg = await message.channel.send(embed = suggestionEmbed)
+                await msg.add_reaction("✅")
+                await msg.add_reaction("❌")
 
 def setup(client):
     client.add_cog(Suggestions(client))
