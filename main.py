@@ -16,25 +16,14 @@ suggestionChannelIds = myConfig.suggestionChannelIds
 pollChannelIds = myConfig.pollChannelIds
 token = myConfig.token
 
-class PersistentView(View):
-    def __init__(self):
-        super().__init__(timeout=None)
-        #Button 1
-    @discord.ui.button(style=discord.ButtonStyle.blurple, label="Click Me!", custom_id="buttonYes")
-    async def buttonYes(self, button: discord.ui.Button, interaction: discord.Interaction):
-      await interaction.response.send_message("Hacked!")
     
-class PersistentViewBot(commands.Bot):
+class MainBot(commands.Bot):
     def __init__(self):
         intents = discord.Intents.default()
         intents.message_content = True
         super().__init__(command_prefix=commands.when_mentioned_or("$"), intents=intents)
-        self.persistent_views_added = False
 
     async def on_ready(self):
-        if not self.persistent_views_added:
-            self.add_view(PersistentView())
-            self.persistent_views_added = True
         print(f"Logged in as {self.user} (ID: {self.user.id})")
         print("------")
 
@@ -52,7 +41,7 @@ async def updateStats():
   await botChannel.edit(name = f"Bot count: {botCount}")
   await userChannel.edit(name = f"User count: {memberCount - botCount}")
 
-bot = PersistentViewBot()
+bot = MainBot()
 
 #See all extensions
 @bot.slash_command(name="listcogs", description="Lists all extensions", guild=discord.Object(id=debugGuildId))
@@ -63,11 +52,13 @@ async def slef(ctx):
       list.append(filename[:-3])
   await ctx.respond(f"{list}", ephemeral = True)
 
+#Load extensions
 @bot.slash_command(name="loadcog", description="Loads cog", guild=discord.Object(id=debugGuildId))
 async def sfwe(ctx, name:str):
     bot.load_extension(f"cogs.{name}")
     await ctx.respond("Done", ephemeral=True)
-    
+
+#Unloads extensions
 @bot.slash_command(name="unloadcog", description="Unloads cog", guild=discord.Object(id=debugGuildId))
 async def sfwe(ctx, name:str):
     bot.unload_extension(f"cogs.{name}")
@@ -129,10 +120,10 @@ async def on_member_join(member: discord.Member):
 async def on_member_remove(member: discord.Member):
   await updateStats()
 
+#Loads all extensions
 for filename in os.listdir('./cogs'):
   if filename.endswith('.py'):
     bot.load_extension(f'cogs.{filename[:-3]}')
-
    
 #To hide the token
 bot.run(token)
