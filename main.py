@@ -101,6 +101,9 @@ async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
   channel = bot.get_channel(payload.channel_id)
   message = await channel.fetch_message(payload.message_id)
   if payload.channel_id in suggestionChannelIds or payload.channel_id in pollChannelIds:
+    if payload.emoji == "🗑":
+      await message.delete()
+      return
     for reaction1 in message.reactions:
       users = [user async for user in reaction1.users()]
       if payload.member in users and not payload.member.bot and str(payload.emoji) != str(reaction1.emoji):
