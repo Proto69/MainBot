@@ -5,6 +5,19 @@ import myConfig
 
 suggestionChannelIds = myConfig.suggestionChannelIds
 
+
+async def findingEmojis(message: discord.Message):
+    emojiUp = "✅"
+    emojiDown = "❌"
+    for emoji in message.guild.emojis:
+        if emoji.id in myConfig.emojisUp:
+            emojiUp = emoji
+        elif emoji.id in myConfig.emojisDown:
+            emojiDown = emoji
+    
+    await message.add_reaction(emojiUp)
+    await message.add_reaction(emojiDown)
+
 class Suggestions(commands.Cog):
 
     def __init__(self, client):
@@ -32,8 +45,8 @@ class Suggestions(commands.Cog):
 
                 await message.delete()
                 msg = await message.channel.send(embed = suggestionEmbed)
-                await msg.add_reaction("✅")
-                await msg.add_reaction("❌")
+                await findingEmojis(msg)
+                
 
 def setup(client):
     client.add_cog(Suggestions(client))

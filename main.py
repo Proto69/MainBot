@@ -1,3 +1,4 @@
+from lib2to3.pgen2.token import DOUBLESLASH
 import discord
 from discord.ext import commands
 from discord.ui import View
@@ -16,7 +17,7 @@ suggestionChannelIds = myConfig.suggestionChannelIds
 pollChannelIds = myConfig.pollChannelIds
 token = myConfig.token
 
-    
+  
 class MainBot(commands.Bot):
     def __init__(self):
         intents = discord.Intents.default()
@@ -42,6 +43,8 @@ async def updateStats():
   await userChannel.edit(name = f"User count: {memberCount - botCount}")
 
 bot = MainBot()
+
+    
 
 #See all extensions
 @bot.slash_command(name="listcogs", description="Lists all extensions", guild=discord.Object(id=debugGuildId))
@@ -101,9 +104,21 @@ async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
   channel = bot.get_channel(payload.channel_id)
   message = await channel.fetch_message(payload.message_id)
   if payload.channel_id in suggestionChannelIds or payload.channel_id in pollChannelIds:
-    if payload.emoji == "🗑":
-      await message.delete()
-      return
+    print(str(payload.emoji))
+    if payload.user_id == 878274765624848424:
+      if str(payload.emoji) == "🗑️":
+        await message.delete()
+        return
+      elif str(payload.emoji) == "⭐":
+        approvedChannel = bot.get_channel(myConfig.approvedChannel)
+        await message.delete()
+        await approvedChannel.send(embed = message.embeds[0])
+        return
+      elif str(payload.emoji) == "⛔":
+        rejectedChannel = bot.get_channel(myConfig.rejectedChannel)
+        await message.delete()
+        await rejectedChannel.send(embed = message.embeds[0])
+        return
     for reaction1 in message.reactions:
       users = [user async for user in reaction1.users()]
       if payload.member in users and not payload.member.bot and str(payload.emoji) != str(reaction1.emoji):
