@@ -8,7 +8,7 @@ pollChannelIds = myConfig.pollChannelIds
 
 class PollEmbed(discord.Embed):
     def __init__(self, user: discord.Member, options: list[str]):
-        super().__init__(title=f"Poll by {user.name}", color=discord.Color.blue())
+        super().__init__(title=f"{user}", color=discord.Color.blue())
         self.timestamp = datetime.now()
         i = 1
         for option in options:

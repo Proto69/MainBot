@@ -1,7 +1,7 @@
 from lib2to3.pgen2.token import DOUBLESLASH
 import discord
 from discord.ext import commands
-from discord.ui import View
+from discord.ui import View, Modal
 from datetime import *
 import os
 import myConfig
@@ -17,7 +17,7 @@ suggestionChannelIds = myConfig.suggestionChannelIds
 pollChannelIds = myConfig.pollChannelIds
 token = myConfig.token
 
-  
+
 class MainBot(commands.Bot):
     def __init__(self):
         intents = discord.Intents.default()
@@ -44,7 +44,74 @@ async def updateStats():
 
 bot = MainBot()
 
-    
+async def fetchYesChannelId():
+  for id in myConfig.approvedChannel:
+    channel = bot.get_channel(id)
+    if channel is not None:
+      return channel
+
+async def fetchNoChannelId():
+  for id in myConfig.rejectedChannel:
+    channel = bot.get_channel(id)
+    if channel is not None:
+      return channel
+
+async def mostReaction(message):
+  mostEmoji = None
+  mostCount = 0
+  for reaction in message.reactions:
+    count = reaction.count
+    if count > mostCount:
+      mostCount = count
+      mostEmoji = reaction.emoji
+  return mostEmoji
+
+
+
+
+async def suggestionsAction(payload, message, user):
+  if str(payload.emoji) == "⭐":
+    approvedChannel = await fetchYesChannelId()
+    await message.delete()
+    newEmbed = message.embeds[0]
+    newEmbed.colour = discord.Colour.gold()
+    newEmbed.set_footer(text=f"Прието от: {user}")
+    newEmbed.timestamp = discord.Embed.Empty
+    await approvedChannel.send(embed = newEmbed)
+    return
+  elif str(payload.emoji) == "⛔":
+    rejectedChannel = await fetchNoChannelId()
+    await message.delete()
+    newEmbed = message.embeds[0]
+    newEmbed.colour = discord.Colour.red()
+    newEmbed.set_footer(text=f"Отказано от: {user}")
+    newEmbed.timestamp = discord.Embed.Empty
+    await rejectedChannel.send(embed = newEmbed)
+    return
+
+async def pollsAction(payload, message, user):
+  newEmbed = message.embeds[0]
+  newEmbed.timestamp = datetime.now()
+
+  if str(payload.emoji) == "⭐":
+    await message.delete()
+    approvedChannel = await fetchYesChannelId()
+    newEmbed.colour = discord.Colour.gold()
+    emoji = await mostReaction(message)
+    newEmbed.title = f"Приетата опция е: {emoji}"
+    newEmbed.set_footer(text=f"Прието")
+    await approvedChannel.send(embed = newEmbed)
+    return
+
+
+  elif str(payload.emoji) == "⛔":
+    await message.delete()
+    rejectedChannel = await fetchNoChannelId()
+    newEmbed.colour = discord.Colour.red()
+    newEmbed.title = f"Отказано от: {user}"
+    newEmbed.set_footer(text=f"Отказано")
+    await rejectedChannel.send(embed = newEmbed)
+    return
 
 #See all extensions
 @bot.slash_command(name="listcogs", description="Lists all extensions", guild=discord.Object(id=debugGuildId))
@@ -101,28 +168,27 @@ async def info(ctx: discord.ApplicationContext, user: discord.Member = None):
 #No more than 1 reaction
 @bot.event
 async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
+  done = False
   channel = bot.get_channel(payload.channel_id)
   message = await channel.fetch_message(payload.message_id)
+  user = await bot.get_or_fetch_user(payload.user_id)
   if payload.channel_id in suggestionChannelIds or payload.channel_id in pollChannelIds:
     print(str(payload.emoji))
     if payload.user_id == 878274765624848424:
       if str(payload.emoji) == "🗑️":
         await message.delete()
-        return
-      elif str(payload.emoji) == "⭐":
-        approvedChannel = bot.get_channel(myConfig.approvedChannel)
-        await message.delete()
-        await approvedChannel.send(embed = message.embeds[0])
-        return
-      elif str(payload.emoji) == "⛔":
-        rejectedChannel = bot.get_channel(myConfig.rejectedChannel)
-        await message.delete()
-        await rejectedChannel.send(embed = message.embeds[0])
-        return
-    for reaction1 in message.reactions:
-      users = [user async for user in reaction1.users()]
-      if payload.member in users and not payload.member.bot and str(payload.emoji) != str(reaction1.emoji):
-        await message.remove_reaction(reaction1.emoji, payload.member)
+        done = True
+      if channel.id in suggestionChannelIds:
+        await suggestionsAction(payload, message, user)
+        done = True
+      elif channel.id in pollChannelIds:
+        await pollsAction(payload, message, user)
+        done = True
+    if done == False:
+      for reaction1 in message.reactions:
+        users = [user async for user in reaction1.users()]
+        if payload.member in users and not payload.member.bot and str(payload.emoji) != str(reaction1.emoji):
+          await message.remove_reaction(reaction1.emoji, payload.member)
 
 #Reloads the stats
 @bot.slash_command(name="reloadstats", description="Reloads the stats")
