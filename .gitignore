@@ -3,3 +3,4 @@ MainBot/
 main.sqlite
 __pycache__/
 cogs/__pycache__/
+cogs/example.py
