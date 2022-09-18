@@ -50,18 +50,6 @@ async def fetchChannel(whereToSearch):
     if channel is not None:
       return channel
 
-async def fetchYesChannelId():
-  for id in myConfig.approvedChannel:
-    channel = bot.get_channel(id)
-    if channel is not None:
-      return channel
-
-async def fetchNoChannelId():
-  for id in myConfig.rejectedChannel:
-    channel = bot.get_channel(id)
-    if channel is not None:
-      return channel
-
 async def mostReaction(message):
   mostEmoji = None
   mostCount = 0
