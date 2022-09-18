@@ -1,4 +1,4 @@
-config.py
+myConfig.py
 MainBot/
 main.sqlite
 __pycache__/
