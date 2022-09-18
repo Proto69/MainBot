@@ -44,6 +44,12 @@ async def updateStats():
 
 bot = MainBot()
 
+async def fetchChannel(whereToSearch):
+  for id in whereToSearch:
+    channel = bot.get_channel(id)
+    if channel is not None:
+      return channel
+
 async def fetchYesChannelId():
   for id in myConfig.approvedChannel:
     channel = bot.get_channel(id)
@@ -71,7 +77,7 @@ async def mostReaction(message):
 
 async def suggestionsAction(payload, message, user):
   if str(payload.emoji) == "⭐":
-    approvedChannel = await fetchYesChannelId()
+    approvedChannel = await fetchChannel(myConfig.approvedChannel)
     await message.delete()
     newEmbed = message.embeds[0]
     newEmbed.colour = discord.Colour.gold()
@@ -80,7 +86,7 @@ async def suggestionsAction(payload, message, user):
     await approvedChannel.send(embed = newEmbed)
     return
   elif str(payload.emoji) == "⛔":
-    rejectedChannel = await fetchNoChannelId()
+    rejectedChannel = await fetchChannel(myConfig.rejectedChannel)
     await message.delete()
     newEmbed = message.embeds[0]
     newEmbed.colour = discord.Colour.red()
@@ -95,7 +101,7 @@ async def pollsAction(payload, message, user):
 
   if str(payload.emoji) == "⭐":
     await message.delete()
-    approvedChannel = await fetchYesChannelId()
+    approvedChannel = await fetchChannel(myConfig.approvedChannel)
     newEmbed.colour = discord.Colour.gold()
     emoji = await mostReaction(message)
     newEmbed.title = f"Приетата опция е: {emoji}"
@@ -106,7 +112,7 @@ async def pollsAction(payload, message, user):
 
   elif str(payload.emoji) == "⛔":
     await message.delete()
-    rejectedChannel = await fetchNoChannelId()
+    rejectedChannel = await fetchChannel(myConfig.rejectedChannel)
     newEmbed.colour = discord.Colour.red()
     newEmbed.title = f"Отказано от: {user}"
     newEmbed.set_footer(text=f"Отказано")
