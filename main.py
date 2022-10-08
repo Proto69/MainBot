@@ -1,4 +1,3 @@
-from lib2to3.pgen2.token import DOUBLESLASH
 import discord
 from discord.ext import commands
 from discord.ui import View, Modal
